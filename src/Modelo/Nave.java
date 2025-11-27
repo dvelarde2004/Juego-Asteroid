@@ -26,8 +26,8 @@ public class Nave {
         this.y = Math.max(0, Math.min(y, altoMax - tamaño));
     }
 
-    // Comprueba si la nave choca con una bola
-    public boolean colisionaCon(Ball ball) {
+    // SOLO UN HILO PUEDE EJECUTAR ESTO A LA VEZ
+    public synchronized boolean colisionaCon(Ball ball) {
         int ballX = ball.getX();
         int ballY = ball.getY();
         int ballTamaño = ball.getTamaño();

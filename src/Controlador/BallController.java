@@ -15,7 +15,7 @@ public class BallController implements Runnable {
     private int ajusteVelocidadGlobal = 0;
     private int ajusteTamañoGlobal = 0;
 
-    // Constructor normal, le paso todo lo que necesita
+    // Constructor normal, le paso la bola, la vista, las demas bolas y la nave
     public BallController(Ball ball, BallVista view, List<Ball> balls, Nave nave) {
         this.ball = ball;
         this.view = view;
@@ -28,10 +28,9 @@ public class BallController implements Runnable {
     public void run() {
         while (running) {
             ball.movimiento(); // Muevo la bola
-
             rebotarContraNave(); // Compruebo si choca con la nave
 
-            // Miramos colisiones con otras bolas
+            // Miramos si choca con otras bolas
             for (Ball otra : balls) {
                 if (otra != ball && ball.colisionaCon(otra) && ball.hashCode() < otra.hashCode()) {
                     ball.intercambianVelocidad(otra); // Cambian de direccion
@@ -41,19 +40,39 @@ public class BallController implements Runnable {
             view.draw(balls); // Actualizo la pantalla
 
             try {
-                Thread.sleep(16); // Para que vaya fluido
+                Thread.sleep(8); // Un poquito mas rapido para que vaya mejor
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    // Hago que la bola rebote si toca la nave
+    // Compruebo si la bola choca con la nave usando los centros
     private void rebotarContraNave() {
-        if (nave != null && nave.colisionaCon(ball)) {
-            ball.setVx(-ball.getVx()); // Cambio direccion X
-            ball.setVy(-ball.getVy()); // Cambio direccion Y
-            ball.movimiento(); // Un empujon para que no se quede pegada
+        if (nave != null) {
+            // Calculo el centro de la bola y de la nave
+            int ballCenterX = ball.getX() + ball.getTamaño()/2;
+            int ballCenterY = ball.getY() + ball.getTamaño()/2;
+            int naveCenterX = nave.getX() + nave.getTamaño()/2;
+            int naveCenterY = nave.getY() + nave.getTamaño()/2;
+
+            // Calculo la distancia entre los dos centros
+            int distanciaX = ballCenterX - naveCenterX;
+            int distanciaY = ballCenterY - naveCenterY;
+            double distancia = Math.sqrt(distanciaX * distanciaX + distanciaY * distanciaY);
+
+            // Distancia minima para que choquen (radio bola + radio nave)
+            int minDistancia = (ball.getTamaño()/2) + (nave.getTamaño()/2);
+
+            // Si estan mas cerca de lo que deberian, chocan
+            if (distancia < minDistancia) {
+                // La bola rebota en direccion contraria
+                ball.setVx(-ball.getVx());
+                ball.setVy(-ball.getVy());
+
+                // La muevo un poco mas para que no se quede pegada
+                ball.movimiento();
+            }
         }
     }
 
@@ -75,20 +94,20 @@ public class BallController implements Runnable {
         view.refrescar(balls);
     }
 
-    // Añado una bola nueva
+    // Añado una bola nueva al juego
     public void añadirBola(Ball nuevaBola) {
-        // Le aplico los ajustes actuales
+        // Le pongo la velocidad y tamaño actuales
         nuevaBola.ajustarVelocidadDesdeBase(ajusteVelocidadGlobal);
         nuevaBola.ajustarTamañoDesdeBase(ajusteTamañoGlobal);
 
+        // La añado a la lista y creo su controlador
         balls.add(nuevaBola);
-        // Creo controlador nuevo para la bola nueva
         BallController nuevoController = new BallController(nuevaBola, view, balls, nave);
-        new Thread(nuevoController).start();
-        view.refrescar(balls);
+        new Thread(nuevoController).start(); // La pongo en movimiento
+        view.refrescar(balls); // Actualizo la pantalla
     }
 
-    // Para parar el hilo
+    // Para parar esta bola si hace falta
     public void stop() {
         running = false;
     }
