@@ -89,11 +89,28 @@ public class Ball {
         otra.vy = tempVy;
     }
 
-    // Getters
+    // ✅ AÑADIR ESTOS 4 MÉTODOS NUEVOS PARA REBOTE CON NAVE:
+    public void setVx(int vx) {
+        this.vx = vx;
+    }
+
+    public void setVy(int vy) {
+        this.vy = vy;
+    }
+
+    public int getVx() {
+        return vx;
+    }
+
+    public int getVy() {
+        return vy;
+    }
+
+    // Getters existentes
     public int getX() { return x; }
     public int getY() { return y; }
     public int getTamaño() { return tamaño; }
     public Color getColor() { return color; }
-    public int getTamañoBase() { return tamañoBase; } // ✅ NUEVO
-    public int getVelocidadBase() { return velocidadBase; } // ✅ NUEVO
+    public int getTamañoBase() { return tamañoBase; }
+    public int getVelocidadBase() { return velocidadBase; }
 }
