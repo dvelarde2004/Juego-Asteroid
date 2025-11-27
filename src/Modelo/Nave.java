@@ -1,86 +1,77 @@
 package Modelo;
 
 public class Nave {
-    private int x, y; // Posición de la nave
-    private int tamaño; // Tamaño visualmente atractivo pero modificable
-    private int velocidad; // Velocidad atractiva pero modificable
-    private int direccion; // 0=arriba (0°), 1=derecha (90°), 2=abajo (180°), 3=izquierda (270°)
-    private final int width, height; // Límites de la pantalla
+    private int x, y;
+    private int tamaño;
+    private int direccion; // 0=arriba, 1=derecha, 2=abajo, 3=izquierda
+    private int anchoMax, altoMax;
 
-    public Nave(int width, int height) {
-        this.width = width;
-        this.height = height;
-
-        // ✅ VALORES POR DEFECTO (visualmente atractivos pero modificables)
-        this.tamaño = 50; // 50px - buen tamaño visual
-        this.velocidad = 6; // 6px/frame - velocidad balanceada
+    public Nave(int anchoMax, int altoMax) {
+        this.anchoMax = anchoMax;
+        this.altoMax = altoMax;
+        this.tamaño = 50;
+        this.x = anchoMax / 2 - tamaño / 2; // Centro horizontal
+        this.y = altoMax - tamaño - 20; // Parte inferior
         this.direccion = 0; // Mirando hacia arriba por defecto
-
-        // ✅ POSICIÓN INICIAL CENTRADA
-        this.x = width / 2 - tamaño / 2;
-        this.y = height / 2 - tamaño / 2;
     }
 
-    // ✅ MOVIMIENTOS DIRECTOS CON TECLAS
-    public void moverArriba() {
-        if (y - velocidad >= 0) { // ✅ NO SALIRSE DE PANTALLA
-            y -= velocidad;
-        }
-        direccion = 0; // 0° - Arriba
+    // ✅ MÉTODO PARA MOVER LA NAVE
+    public void mover(int dx, int dy) {
+        this.x += dx;
+        this.y += dy;
+
+        // Limitar dentro de los bordes de la pantalla
+        this.x = Math.max(0, Math.min(x, anchoMax - tamaño));
+        this.y = Math.max(0, Math.min(y, altoMax - tamaño));
     }
 
-    public void moverDerecha() {
-        if (x + tamaño + velocidad <= width) { // ✅ NO SALIRSE DE PANTALLA
-            x += velocidad;
-        }
-        direccion = 1; // 90° - Derecha
+    // ✅ MÉTODO PARA VERIFICAR COLISIÓN CON PELOTA
+    public boolean colisionaCon(Ball ball) {
+        int ballX = ball.getX();
+        int ballY = ball.getY();
+        int ballTamaño = ball.getTamaño();
+
+        return x < ballX + ballTamaño &&
+                x + tamaño > ballX &&
+                y < ballY + ballTamaño &&
+                y + tamaño > ballY;
     }
 
-    public void moverAbajo() {
-        if (y + tamaño + velocidad <= height) { // ✅ NO SALIRSE DE PANTALLA
-            y += velocidad;
-        }
-        direccion = 2; // 180° - Abajo
+    // ✅ GETTERS Y SETTERS
+    public int getX() {
+        return x;
     }
 
-    public void moverIzquierda() {
-        if (x - velocidad >= 0) { // ✅ NO SALIRSE DE PANTALLA
-            x -= velocidad;
-        }
-        direccion = 3; // 270° - Izquierda
+    public int getY() {
+        return y;
     }
 
-    // ✅ DETECCIÓN DE COLISIÓN (MISMA QUE BOLAS)
-    public boolean colisionaCon(Ball bola) {
-        // Calcular centros
-        int centroNaveX = x + tamaño / 2;
-        int centroNaveY = y + tamaño / 2;
-        int centroBolaX = bola.getX() + bola.getTamaño() / 2;
-        int centroBolaY = bola.getY() + bola.getTamaño() / 2;
-
-        // Calcular distancia entre centros
-        int dx = centroNaveX - centroBolaX;
-        int dy = centroNaveY - centroBolaY;
-        int distancia = (int) Math.sqrt(dx * dx + dy * dy);
-
-        // Suma de radios (misma física que bolas)
-        int sumaRadios = (tamaño / 2) + (bola.getTamaño() / 2);
-
-        return distancia < sumaRadios;
+    public int getTamaño() {
+        return tamaño;
     }
 
-    // ✅ GETTERS Y SETTERS (PARA MODIFICAR EN FUTURO)
-    public int getX() { return x; }
-    public int getY() { return y; }
-    public int getTamaño() { return tamaño; }
-    public int getVelocidad() { return velocidad; }
-    public int getDireccion() { return direccion; }
+    public int getDireccion() {
+        return direccion;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
 
     public void setTamaño(int tamaño) {
-        this.tamaño = Math.max(20, Math.min(100, tamaño)); // Límites razonables
+        this.tamaño = tamaño;
     }
 
-    public void setVelocidad(int velocidad) {
-        this.velocidad = Math.max(1, Math.min(15, velocidad)); // Límites razonables
+    public void setDireccion(int direccion) {
+        this.direccion = direccion;
+    }
+
+    // ✅ MÉTODO PARA VER ESTADO ACTUAL (DEBUG)
+    public String getEstado() {
+        return String.format("Nave[Pos:(%d,%d) Tamaño:%d Dirección:%d]", x, y, tamaño, direccion);
     }
 }

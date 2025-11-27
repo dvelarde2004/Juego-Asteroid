@@ -2,74 +2,80 @@ package Controlador;
 
 import Modelo.Nave;
 import Vista.NaveVista;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import javax.swing.*;
 
 public class NaveController implements Runnable {
     private Nave nave;
-    private NaveVista vista;
-    private boolean wPresionado, aPresionado, sPresionado, dPresionado;
-    private boolean running;
+    private NaveVista vistaNave;
+    private boolean wPressed = false, aPressed = false, sPressed = false, dPressed = false;
 
-    public NaveController(Nave nave, NaveVista vista) {
+    public NaveController(Nave nave, NaveVista vistaNave) {
         this.nave = nave;
-        this.vista = vista;
-        this.running = true;
-        setupKeyListeners();
+        this.vistaNave = vistaNave;
+        configurarControlesGlobales();
+    }
+
+    private void configurarControlesGlobales() {
+        // ✅ USAR KEY BINDINGS QUE FUNCIONAN SIN FOCUS
+        JPanel panel = vistaNave;
+
+        panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("W"), "moverArriba");
+        panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("S"), "moverAbajo");
+        panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("A"), "moverIzquierda");
+        panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("D"), "moverDerecha");
+
+        panel.getActionMap().put("moverArriba", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                nave.setY(nave.getY() - 10);
+                nave.setDireccion(0);
+                vistaNave.actualizarNave();
+                System.out.println("⬆️ Moviendo ARRIBA");
+            }
+        });
+
+        panel.getActionMap().put("moverAbajo", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                nave.setY(nave.getY() + 10);
+                nave.setDireccion(2);
+                vistaNave.actualizarNave();
+                System.out.println("⬇️ Moviendo ABAJO");
+            }
+        });
+
+        panel.getActionMap().put("moverIzquierda", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                nave.setX(nave.getX() - 10);
+                nave.setDireccion(3);
+                vistaNave.actualizarNave();
+                System.out.println("⬅️ Moviendo IZQUIERDA");
+            }
+        });
+
+        panel.getActionMap().put("moverDerecha", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                nave.setX(nave.getX() + 10);
+                nave.setDireccion(1);
+                vistaNave.actualizarNave();
+                System.out.println("➡️ Moviendo DERECHA");
+            }
+        });
+
+        System.out.println("✅ Controles globales configurados (W,A,S,D)");
     }
 
     @Override
     public void run() {
-        while (running) {
-            // ✅ ACTUALIZAR MOVIMIENTO CONTINUO
-            actualizarMovimiento();
-
-            // ✅ ACTUALIZAR VISTA (para rotación suave)
-            vista.actualizarNave();
-
+        while (true) {
             try {
-                Thread.sleep(16); // ~60 FPS
+                Thread.sleep(16);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                break;
             }
         }
-    }
-
-    private void setupKeyListeners() {
-        vista.setFocusable(true);
-        vista.requestFocusInWindow();
-
-        vista.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_W -> wPresionado = true;
-                    case KeyEvent.VK_A -> aPresionado = true;
-                    case KeyEvent.VK_S -> sPresionado = true;
-                    case KeyEvent.VK_D -> dPresionado = true;
-                }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_W -> wPresionado = false;
-                    case KeyEvent.VK_A -> aPresionado = false;
-                    case KeyEvent.VK_S -> sPresionado = false;
-                    case KeyEvent.VK_D -> dPresionado = false;
-                }
-            }
-        });
-    }
-
-    private void actualizarMovimiento() {
-        if (wPresionado) nave.moverArriba();
-        if (sPresionado) nave.moverAbajo();
-        if (aPresionado) nave.moverIzquierda();
-        if (dPresionado) nave.moverDerecha();
-    }
-
-    public void stop() {
-        running = false;
     }
 }
