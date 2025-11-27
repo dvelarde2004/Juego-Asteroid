@@ -1,6 +1,10 @@
-import Vista.*;
-import Controlador.*;
-import Modelo.*;
+import Vista.BallVista;
+import Vista.NaveVista;
+import Vista.ControlPanel;
+import Controlador.BallController;
+import Controlador.NaveController;
+import Modelo.Ball;
+import Modelo.Nave;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,134 +15,107 @@ import static java.awt.Color.*;
 
 public class Main {
     public static void main(String[] args) {
-        // Dimensiones del área de movimiento
-        int gameWidth = 800;   // Ancho del área de juego
-        int gameHeight = 600;  // Alto del área de juego
-        int panelHeight = 120; // Alto del panel de control
+        // Tamaños de la ventana
+        int anchoJuego = 800;
+        int altoJuego = 600;
+        int altoPanel = 120;
 
-        System.out.println("🚀 INICIANDO JUEGO...");
+        System.out.println("Iniciando juego...");
 
-        // Crear las pelotas iniciales
-        Ball ball1 = new Ball(RED, 50, 50, 2, 3, gameWidth, gameHeight);
-        Ball ball2 = new Ball(BLUE, 100, 100, 3, 2, gameWidth, gameHeight);
-        Ball ball3 = new Ball(GREEN, 150, 150, 4, 4, gameWidth, gameHeight);
+        // Creo las tres bolas iniciales
+        Ball bola1 = new Ball(RED, 50, 50, 2, 3, anchoJuego, altoJuego);
+        Ball bola2 = new Ball(BLUE, 100, 100, 3, 2, anchoJuego, altoJuego);
+        Ball bola3 = new Ball(GREEN, 150, 150, 4, 4, anchoJuego, altoJuego);
 
-        // ✅ CREAR LA NAVE
-        Nave nave = new Nave(gameWidth, gameHeight);
-        nave.setX(375);
-        nave.setY(500);
+        // Creo la nave
+        Nave nave = new Nave(anchoJuego, altoJuego);
+        nave.setX(375); // Centro
+        nave.setY(500); // Abajo
         nave.setTamaño(50);
 
-        System.out.println("📍 Nave creada - Posición: " + nave.getX() + ", " + nave.getY());
+        // Lista con todas las bolas
+        List<Ball> bolas = new ArrayList<>(List.of(bola1, bola2, bola3));
 
-        // Crear la vista principal de bolas
-        List<Ball> balls = new ArrayList<>(List.of(ball1, ball2, ball3));
+        // Vista principal donde se dibuja todo
         BallVista vistaPrincipal = new BallVista();
-        vistaPrincipal.setBalls(balls);
+        vistaPrincipal.setBalls(bolas);
 
-        // ✅ CREAR LA VISTA DE LA NAVE
+        // Vista de la nave que se superpone
         NaveVista vistaNave = new NaveVista(nave);
-        System.out.println("🖼️ VistaNave creada");
 
-        // ✅ CONFIGURAR SUPERPOSICIÓN
+        // Configuro como se ven las cosas
         vistaPrincipal.setLayout(null);
         vistaPrincipal.add(vistaNave);
-
-        // ✅ POSICIONAR LA VISTA DE LA NAVE
         vistaNave.setBounds(nave.getX(), nave.getY(), nave.getTamaño(), nave.getTamaño());
-        System.out.println("📐 VistaNave bounds: " + vistaNave.getBounds());
 
-        // ✅ CREAR CONTROLADORES
-        BallController controller1 = new BallController(ball1, vistaPrincipal, balls, nave);
-        BallController controller2 = new BallController(ball2, vistaPrincipal, balls, nave);
-        BallController controller3 = new BallController(ball3, vistaPrincipal, balls, nave);
-        NaveController naveController = new NaveController(nave, vistaNave);
-
-        // Configurar listeners (simplificado)
-        vistaPrincipal.setFocusable(true);
-
-        // ✅ CONFIGURAR BallVista CORRECTAMENTE
-        vistaPrincipal.setSize(gameWidth, gameHeight);
+        // Tamaño y color del fondo
+        vistaPrincipal.setSize(anchoJuego, altoJuego);
         vistaPrincipal.setBackground(Color.WHITE);
         vistaPrincipal.setOpaque(true);
 
-        // ✅ CREAR PANEL DE CONTROL
-        ControlPanel controlPanel = new ControlPanel();
+        // Controladores para mover todo
+        BallController controladorBola1 = new BallController(bola1, vistaPrincipal, bolas, nave);
+        BallController controladorBola2 = new BallController(bola2, vistaPrincipal, bolas, nave);
+        BallController controladorBola3 = new BallController(bola3, vistaPrincipal, bolas, nave);
+        NaveController controladorNave = new NaveController(nave, vistaNave);
 
-        // ✅ CONFIGURAR LISTENERS DEL PANEL DE CONTROL
-        controlPanel.setAddBallListener(e -> {
+        // Panel de control con sliders
+        ControlPanel panelControl = new ControlPanel();
+
+        // Configuro el boton de añadir bola
+        panelControl.setAddBallListener(e -> {
+            // Bola nueva con color aleatorio
             Ball nuevaBola = new Ball(
                     new Color(
                             (int)(Math.random() * 255),
                             (int)(Math.random() * 255),
                             (int)(Math.random() * 255)
                     ),
-                    (int)(Math.random() * (gameWidth - 50)),
-                    (int)(Math.random() * (gameHeight - 50)),
+                    (int)(Math.random() * (anchoJuego - 50)),
+                    (int)(Math.random() * (altoJuego - 50)),
                     (int)(Math.random() * 5) + 1,
                     (int)(Math.random() * 5) + 1,
-                    gameWidth, gameHeight
+                    anchoJuego, altoJuego
             );
-            controller1.añadirBola(nuevaBola);
-            System.out.println("⚪ Nueva bola añadida");
+            controladorBola1.añadirBola(nuevaBola);
         });
 
-        // ✅ CONFIGURAR SLIDERS
-        controlPanel.velocidadSlider.addChangeListener(e -> {
-            int velocidad = controlPanel.velocidadSlider.getValue();
-            controller1.ajustarVelocidadGlobal(velocidad - 5); // Ajuste relativo
-            System.out.println("🎚️ Velocidad ajustada: " + velocidad);
+        // Slider de velocidad
+        panelControl.velocidadSlider.addChangeListener(e -> {
+            int velocidad = panelControl.velocidadSlider.getValue();
+            controladorBola1.ajustarVelocidadGlobal(velocidad - 5);
         });
 
-        controlPanel.tamañoSlider.addChangeListener(e -> {
-            int tamaño = controlPanel.tamañoSlider.getValue();
-            controller1.ajustarTamañoGlobal(tamaño - 30); // Ajuste relativo
-            System.out.println("📏 Tamaño ajustado: " + tamaño);
+        // Slider de tamaño
+        panelControl.tamañoSlider.addChangeListener(e -> {
+            int tamaño = panelControl.tamañoSlider.getValue();
+            controladorBola1.ajustarTamañoGlobal(tamaño - 30);
         });
 
-        // ✅ CONFIGURAR Y MOSTRAR VENTANA PRINCIPAL
+        // Creo la ventana principal
         JFrame ventana = new JFrame("Space Invaders con Panel de Control");
         ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        ventana.setSize(gameWidth, gameHeight + panelHeight); // ✅ Alto total aumentado
+        ventana.setSize(anchoJuego, altoJuego + altoPanel);
         ventana.setLocationRelativeTo(null);
         ventana.setResizable(false);
 
-        // ✅ CREAR CONTENEDOR PRINCIPAL CON PANEL ABAJO
+        // Pongo el juego arriba y el panel abajo
         JPanel contenedorPrincipal = new JPanel(new BorderLayout());
         contenedorPrincipal.add(vistaPrincipal, BorderLayout.CENTER);
-        contenedorPrincipal.add(controlPanel, BorderLayout.SOUTH); // ✅ PANEL ABAJO
+        contenedorPrincipal.add(panelControl, BorderLayout.SOUTH);
 
         ventana.add(contenedorPrincipal);
         ventana.setVisible(true);
-        System.out.println("🖼️ VENTANA PRINCIPAL HECHA VISIBLE");
-        System.out.println("📏 Tamaño ventana: " + ventana.getWidth() + "x" + ventana.getHeight());
 
-        // ✅ DAR FOCO PARA LOS CONTROLES DE NAVE
+        // Doy foco para los controles
         vistaNave.requestFocusInWindow();
-        System.out.println("🎯 Focus dado a vistaNave");
 
-        // ✅ INICIAR HILOS
-        new Thread(controller1).start();
-        new Thread(controller2).start();
-        new Thread(controller3).start();
-        new Thread(naveController).start();
+        // Arranco todos los hilos
+        new Thread(controladorBola1).start();
+        new Thread(controladorBola2).start();
+        new Thread(controladorBola3).start();
+        new Thread(controladorNave).start();
 
-        System.out.println("✅ TODOS LOS HILOS INICIADOS");
-        System.out.println("🎮 Controles: W, A, S, D para mover la nave");
-
-        // ✅ VERIFICACIÓN FINAL
-        new Thread(() -> {
-            try {
-                Thread.sleep(1000);
-                System.out.println("🔍 VERIFICACIÓN FINAL:");
-                System.out.println("   Ventana visible: " + ventana.isVisible());
-                System.out.println("   Ventana tamaño: " + ventana.getWidth() + "x" + ventana.getHeight());
-                System.out.println("   BallVista tamaño: " + vistaPrincipal.getWidth() + "x" + vistaPrincipal.getHeight());
-                System.out.println("   Nave visible: " + vistaNave.isVisible());
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
+        System.out.println("Juego iniciado!");
     }
 }

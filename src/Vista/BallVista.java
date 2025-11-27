@@ -10,15 +10,15 @@ import java.util.List;
 public class BallVista extends JPanel {
     private List<Ball> balls;
 
+    // Constructor de la vista donde se ven las bolas
     public BallVista() {
-        // ✅ CAMBIAR FONDO A BLANCO
-        setBackground(Color.WHITE);
+        setBackground(Color.WHITE); // Fondo blanco
         setOpaque(true);
-
-        setLayout(null);
-        setPreferredSize(new Dimension(800, 600));
+        setLayout(null); // Para poder poner la nave donde quiera
+        setPreferredSize(new Dimension(800, 600)); // Tamaño fijo
     }
 
+    // Le paso la lista de bolas para que las dibuje
     public void setBalls(List<Ball> balls) {
         this.balls = balls;
     }
@@ -27,11 +27,11 @@ public class BallVista extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // ✅ FONDO BLANCO (sin debug)
+        // Pinto el fondo blanco
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, getWidth(), getHeight());
 
-        // ✅ DIBUJAR LAS PELOTAS (sin textos de debug)
+        // Dibujo todas las bolas
         if (balls != null) {
             for (Ball ball : balls) {
                 g.setColor(ball.getColor());
@@ -40,11 +40,19 @@ public class BallVista extends JPanel {
         }
     }
 
+    // Esto ya no se usa mucho pero lo dejo por si acaso
+    public void setupControllerListeners(BallController controller, List<Ball> balls, int width, int height) {
+        this.balls = balls;
+        setFocusable(true);
+    }
+
+    // Para actualizar el dibujo de las bolas
     public void draw(List<Ball> balls) {
         this.balls = balls;
         repaint();
     }
 
+    // Lo mismo que draw pero con otro nombre
     public void refrescar(List<Ball> balls) {
         this.balls = balls;
         repaint();

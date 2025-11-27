@@ -10,58 +10,54 @@ public class BallController implements Runnable {
     private Ball ball;
     private BallVista view;
     private List<Ball> balls;
-    private Nave nave; // ✅ NUEVO: Referencia a la nave
+    private Nave nave; // Para que rebote con la nave
     private boolean running;
     private int ajusteVelocidadGlobal = 0;
     private int ajusteTamañoGlobal = 0;
 
-    // ✅ CONSTRUCTOR ACTUALIZADO (añadir parámetro nave)
+    // Constructor normal, le paso todo lo que necesita
     public BallController(Ball ball, BallVista view, List<Ball> balls, Nave nave) {
         this.ball = ball;
         this.view = view;
         this.balls = balls;
-        this.nave = nave; // ✅ NUEVO
+        this.nave = nave;
         this.running = true;
     }
 
     @Override
     public void run() {
         while (running) {
-            ball.movimiento();
+            ball.movimiento(); // Muevo la bola
 
-            // ✅ NUEVO: Verificar colisión con nave
-            rebotarContraNave();
+            rebotarContraNave(); // Compruebo si choca con la nave
 
-            // CÓDIGO EXISTENTE (no tocar)
+            // Miramos colisiones con otras bolas
             for (Ball otra : balls) {
                 if (otra != ball && ball.colisionaCon(otra) && ball.hashCode() < otra.hashCode()) {
-                    ball.intercambianVelocidad(otra);
+                    ball.intercambianVelocidad(otra); // Cambian de direccion
                 }
             }
 
-            view.draw(balls);
+            view.draw(balls); // Actualizo la pantalla
 
             try {
-                Thread.sleep(16);
+                Thread.sleep(16); // Para que vaya fluido
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    // ✅ NUEVO MÉTODO: Rebote contra nave
+    // Hago que la bola rebote si toca la nave
     private void rebotarContraNave() {
         if (nave != null && nave.colisionaCon(ball)) {
-            // Física simple de rebote - invertir dirección
-            ball.setVx(-ball.getVx());
-            ball.setVy(-ball.getVy());
-
-            // Pequeño empuje para evitar stuck
-            ball.movimiento();
+            ball.setVx(-ball.getVx()); // Cambio direccion X
+            ball.setVy(-ball.getVy()); // Cambio direccion Y
+            ball.movimiento(); // Un empujon para que no se quede pegada
         }
     }
 
-    // MÉTODOS EXISTENTES (sin cambios)
+    // Cambio la velocidad de todas las bolas
     public void ajustarVelocidadGlobal(int ajuste) {
         this.ajusteVelocidadGlobal = ajuste;
         for (Ball b : balls) {
@@ -70,6 +66,7 @@ public class BallController implements Runnable {
         view.refrescar(balls);
     }
 
+    // Cambio el tamaño de todas las bolas
     public void ajustarTamañoGlobal(int ajuste) {
         this.ajusteTamañoGlobal = ajuste;
         for (Ball b : balls) {
@@ -78,17 +75,20 @@ public class BallController implements Runnable {
         view.refrescar(balls);
     }
 
+    // Añado una bola nueva
     public void añadirBola(Ball nuevaBola) {
-        // Aplicar ajustes globales actuales a la nueva bola
+        // Le aplico los ajustes actuales
         nuevaBola.ajustarVelocidadDesdeBase(ajusteVelocidadGlobal);
         nuevaBola.ajustarTamañoDesdeBase(ajusteTamañoGlobal);
 
         balls.add(nuevaBola);
-        BallController nuevoController = new BallController(nuevaBola, view, balls, nave); // ✅ Actualizado
+        // Creo controlador nuevo para la bola nueva
+        BallController nuevoController = new BallController(nuevaBola, view, balls, nave);
         new Thread(nuevoController).start();
         view.refrescar(balls);
     }
 
+    // Para parar el hilo
     public void stop() {
         running = false;
     }

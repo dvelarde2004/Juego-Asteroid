@@ -9,33 +9,33 @@ public class ControlPanel extends JPanel {
     public JSlider tamañoSlider;
     public JButton añadirBallBoton;
 
+    // Panel de control con sliders y botones
     public ControlPanel() {
-        // ✅ LAYOUT HORIZONTAL para panel inferior
+        // Layout horizontal para que quede bonito
         setLayout(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        setPreferredSize(new Dimension(800, 100));
+        setPreferredSize(new Dimension(800, 100)); // Tamaño fijo
+        setBackground(new Color(240, 240, 240)); // Fondo gris claro
+        setBorder(BorderFactory.createTitledBorder("Panel de Control")); // Borde con titulo
 
-        // ✅ MEJORAR ESTILO
-        setBackground(new Color(240, 240, 240));
-        setBorder(BorderFactory.createTitledBorder("Panel de Control"));
-
-        // ✅ ETIQUETA Y SLIDER VELOCIDAD
+        // Slider para la velocidad
         add(new JLabel("Velocidad:"));
         velocidadSlider = new JSlider(1, 10, 5);
         velocidadSlider.setPreferredSize(new Dimension(100, 40));
         add(velocidadSlider);
 
-        // ✅ ETIQUETA Y SLIDER TAMAÑO
+        // Slider para el tamaño
         add(new JLabel("Tamaño:"));
         tamañoSlider = new JSlider(10, 100, 30);
         tamañoSlider.setPreferredSize(new Dimension(100, 40));
         add(tamañoSlider);
 
-        // ✅ BOTÓN AÑADIR PELOTA
+        // Boton para añadir bolas
         añadirBallBoton = new JButton("Añadir Pelota");
         añadirBallBoton.setPreferredSize(new Dimension(120, 35));
         add(añadirBallBoton);
     }
 
+    // Le paso lo que tiene que hacer el boton
     public void setAddBallListener(ActionListener listener) {
         añadirBallBoton.addActionListener(listener);
     }
